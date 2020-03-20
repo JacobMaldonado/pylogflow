@@ -77,7 +77,6 @@ class Agent():
             self.__message["payload"] = {}
         self.__message["payload"].update(response)
 
-
     # Get Response method
     def get_response(self):
         return self.__message
