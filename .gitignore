@@ -1,2 +1,2 @@
-./setup.py
-./pylogflow.egg-info/*
+setup.py
+pylogflow.egg-info/*
