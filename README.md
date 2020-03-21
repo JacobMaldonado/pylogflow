@@ -130,7 +130,207 @@ In this case, in 'intentTest' function we have to create agent, after that, we c
 
 ##### Google Asisstant
 
+```Python
+import flask
+from flask import request, jsonify
+from pylogflow import IntentMap, GoogleResponse, GoogleRequest, Agent
 
+PROJECT_ID = "flask-1fa09"
+
+app = flask.Flask(__name__)
+app.config['JSON_SORT_KEYS'] = False
+
+@app.route('/', methods=['POST'])
+def home():
+    # Send request as a json, result must be a dictionary
+    result = intentMap.execute_intent(request.json)
+    # Parse result into json format
+    return jsonify(result)
+    
+# Intent Multiple simple response
+def intentSimpleResponse(req):
+    agent = Agent()
+    gResponse = GoogleResponse()
+    gResponse.add_simple_response("Hey")
+    gResponse.add_simple_response("You")
+    agent.add_custom_payload(gResponse.get_response())
+    return agent.get_response()
+
+
+# Intent ayuda
+def intentAyuda(req):
+    # Set agent 
+    agent = Agent()
+    # agent.add_Message("ayuda respondiendo")
+    gResponse = GoogleResponse()
+    gResponse.add_media_response(
+        "nombre",
+        "descripcion",
+        "https://storage.googleapis.com/automotive-media/album_art.jpg",
+        "Album cover of an ccean view",
+        "https://storage.googleapis.com/automotive-media/Jazz_In_Paris.mp3"
+    )
+    gResponse.add_simple_response("Hola, esto es una prueba")
+    gResponse.add_suggestion_chips("flask", "algo")
+    agent.add_custom_payload(gResponse.get_response())
+    # this return a dictionary format
+    return agent.get_response()
+   
+    
+# Intent request
+def intentRequest(req):
+    # Set agent 
+    agent = Agent()
+    gResponse = GoogleResponse()
+    gResponse.add_browse_carrousel(
+        gResponse.generate_browse_carrousel_item(
+            "titulo1",
+            "descripcion 1", 
+            "piesillo 1", 
+            "https://files.realpython.com/media/Python_Exceptions_Watermark.47f814fbeced.jpg", 
+            "hola", 
+            "https://files.realpython.com/media/Python_Exceptions_Watermark.47f814fbeced.jpg"),
+        gResponse.generate_browse_carrousel_item(
+            "titulo2",
+            "descripcion 2", 
+            "piesillo 2", 
+            "https://files.realpython.com/media/Python_Exceptions_Watermark.47f814fbeced.jpg", 
+            "hola", 
+            "https://files.realpython.com/media/Python_Exceptions_Watermark.47f814fbeced.jpg")
+    )
+    agent.add_custom_payload(gResponse.get_response())
+    return agent.get_response()
+
+# Intent algo
+def intentAlgo(req):
+    agent = Agent()
+    gResponse = GoogleResponse()
+    gResponse.add_table(
+        gResponse.generate_table_header_row(
+            gResponse.generate_table_header("Titulo 1"),
+            gResponse.generate_table_header("Titulo 2"),
+            gResponse.generate_table_header("Titulo 3")
+        ),
+        gResponse.generate_table_row(
+            "texto1",
+            "texto2",
+            "texto3"
+        ),
+        gResponse.generate_table_row(
+            "texto1",
+            "texto2",
+            "texto3"
+        ),
+        title="Titulo Prueba",
+        subtitle="prueba subtitulo",
+        imageUrl="https://files.realpython.com/media/Python_Exceptions_Watermark.47f814fbeced.jpg",
+        buttonText="Hola soy un boton",
+        buttonUrl="https://files.realpython.com/media/Python_Exceptions_Watermark.47f814fbeced.jpg",
+    )
+    agent.add_custom_payload(gResponse.get_response())
+    return agent.get_response()
+
+# intent lista
+def intentLista(req):
+    agent = Agent()
+    gResponse = GoogleResponse()
+    gResponse.add_list(
+        gResponse.generate_list_item(
+            "Elemento 1",
+            "ELEMENTO_1",
+            ["cosa 1", "objeto 1"],
+            "descripcion corta",
+            "https://files.realpython.com/media/Python_Exceptions_Watermark.47f814fbeced.jpg"
+        ),
+        gResponse.generate_list_item(
+            "Elemento 2",
+            "ELEMENTO_2",
+            ["cosa 2", "objeto 2"],
+            "descripcion corta",
+            "https://files.realpython.com/media/Python_Exceptions_Watermark.47f814fbeced.jpg"
+        ),
+        gResponse.generate_list_item(
+            "Elemento 3",
+            "ELEMENTO_#",
+            ["cosa 3", "objeto 3"],
+            "descripcion corta",
+            "https://files.realpython.com/media/Python_Exceptions_Watermark.47f814fbeced.jpg"
+        ),
+        title="Titulo de la lista"
+    )
+    agent.add_custom_payload(gResponse.get_response())
+    return agent.get_response()
+
+#Intent opcion lista
+def intentOpcionLista(req):
+    agent = Agent()
+    print(req)
+    gResponse = GoogleResponse()
+    gRequest = GoogleRequest(req)
+    selection = gRequest.get_option_arguments()
+    for option in selection:
+        gResponse.add_simple_response("selected : " + option)
+    capabilities = gRequest.get_capabilities()
+    msg = ""
+    for cap in capabilities:
+        msg += cap["name"]
+    gResponse.add_simple_response(msg)
+    agent.add_custom_payload(gResponse.get_response())
+    return agent.get_response()
+
+# Intent carrousel
+def intentCarrousel(req):
+    agent = Agent()
+    gResponse = GoogleResponse()
+    gResponse.add_carrousel(
+        gResponse.generate_carrousel_item(
+            "Elemento 1",
+            "ELEMENTO_1",
+            ["cosa 1", "objeto 1"],
+            "descripcion corta",
+            "https://files.realpython.com/media/Python_Exceptions_Watermark.47f814fbeced.jpg"
+        ),
+        gResponse.generate_carrousel_item(
+            "Elemento 2",
+            "ELEMENTO_2",
+            ["cosa 2", "objeto 2"],
+            "descripcion corta",
+            "https://files.realpython.com/media/Python_Exceptions_Watermark.47f814fbeced.jpg"
+        ),
+        gResponse.generate_carrousel_item(
+            "Elemento 3",
+            "ELEMENTO_#",
+            ["cosa 3", "objeto 3"],
+            "descripcion corta",
+            "https://files.realpython.com/media/Python_Exceptions_Watermark.47f814fbeced.jpg"
+        )
+    )
+    agent.add_custom_payload(gResponse.get_response())
+    return agent.get_response()
+
+
+# Default fallback intent
+def fallback(req):
+    agent = Agent()
+    agent.add_message("default fallback")
+    print(jsonify(req))
+    return agent.get_response()
+
+# Set up intent map
+intentMap = IntentMap()
+intentMap.add("request", intentRequest)
+intentMap.add("Simple Response", intentSimpleResponse)
+intentMap.add("ayuda", intentAyuda)
+intentMap.add("algo", intentAlgo)
+intentMap.add("lista", intentLista)
+intentMap.add("Default Fallback Intent", fallback)
+intentMap.add("opcion lista", intentOpcionLista)
+intentMap.add("carrousel", intentCarrousel)
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
+
+```
 
 #### Advice
 
