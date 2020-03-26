@@ -27,8 +27,9 @@ class IntentMap():
 class Agent():
 
     # Constructor of message building class
-    def __init__(self):
+    def __init__(self, req=None):
         self.__message = {}
+        self.__request = req
 
     # This mettod appends a message on the response
     def add_message(self, msg):
@@ -77,6 +78,19 @@ class Agent():
             self.__message["payload"] = {}
         self.__message["payload"].update(response)
 
+    # Add Context
+    def add_context(self, name, lifespan, **params):
+        if not self.__request:
+            # TODO: Add exception
+            pass
+        if not 'outputContexts' in self.__message:
+            self.__message['outputContexts'] = []
+        self.__message['outputContexts'].append({
+            'name': self.__request.get('session') + '/contexts/' + name,
+            'lifespanCount': lifespan,
+            'parameters': params
+        })
+
     # Get Response method
     def get_response(self):
         return self.__message
@@ -84,6 +98,42 @@ class Agent():
     # To String method
     def __str__(self):
         return str(self.__message)
+
+class DialogflowRequest():
+
+    # Constructor that accepts request
+    def __init__(self, request):
+        self.request = request
+    
+    # Get all contexts
+    def get_contexts(self):
+        contexts = []
+        for elem in self.request.get('queryResult').get('outputContexts'):
+            elem['simpleName'] = elem.get('name')[elem.get('name').rfind('/') + 1:]
+            contexts.append(elem)
+        return contexts
+
+    # Get context by name if it exist or return None
+    def get_context_by_name(self, name):
+        for elem in self.request.get('queryResult').get('outputContexts'):
+            if name == elem.get('name')[elem.get('name').rfind('/') + 1:]:
+                return name
+        return None
+
+    # Return all parameters present in request
+    def get_params(self):
+        return self.request.get('queryResult').get('parameters')
+
+    # Return parameter by name
+    def get_param_by_name(self, name):
+        res = self.request.get('queryResult').get('parameters').get(name)
+        if res:
+            return {name : res}
+        else:
+            return None
+
+
+
 
 class GoogleResponse():
 
